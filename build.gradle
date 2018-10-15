@@ -1,0 +1,56 @@
+buildscript {
+	ext {
+		springBootVersion = '2.0.5.RELEASE'
+	}
+	repositories {
+		mavenCentral()
+	}
+	dependencies {
+		classpath("org.springframework.boot:spring-boot-gradle-plugin:${springBootVersion}")
+	}
+}
+
+apply plugin: 'java'
+apply plugin: 'eclipse'
+apply plugin: 'org.springframework.boot'
+apply plugin: 'io.spring.dependency-management'
+
+group = 'com.chegg.hackathon'
+version = '0.0.1-SNAPSHOT'
+sourceCompatibility = 1.8
+
+repositories {
+	mavenCentral()
+}
+
+
+dependencies {
+	implementation('org.springframework.boot:spring-boot-starter-data-elasticsearch')
+	implementation('org.springframework.boot:spring-boot-starter-web')
+	
+	
+	compile 'io.searchbox:jest:2.4.0',
+          	'io.searchbox:jest-common:2.4.0',
+          	'com.amazonaws:aws-lambda-java-core:1.0.0',
+          	'com.google.cloud:google-cloud-vision:1.48.0'
+          	
+	runtime 'com.google.cloud:google-cloud-vision:1.48.0'
+          	
+	compile group: 'com.google.auth', name: 'google-auth-library-oauth2-http', version: '0.11.0'
+	
+          	
+	testImplementation('org.springframework.boot:spring-boot-starter-test')
+}
+
+//create a single Jar with all dependencies
+task fatJar(type: Jar) {
+	manifest {
+        attributes 'Implementation-Title': 'Gradle Jar File Example',  
+        	'Implementation-Version': version,
+        	'Main-Class': 'com.chegg.hackathon.imageanalyzer.ImageAnalyzerApplication'
+    }
+    baseName = project.name + '-all'
+    from { configurations.compile.collect { it.isDirectory() ? it : zipTree(it) } }
+    with jar
+}
+
