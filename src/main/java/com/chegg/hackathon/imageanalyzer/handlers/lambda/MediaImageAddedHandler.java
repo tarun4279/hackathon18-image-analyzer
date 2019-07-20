@@ -2,6 +2,7 @@ package com.chegg.hackathon.imageanalyzer.handlers.lambda;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.util.List;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -13,6 +14,7 @@ import com.chegg.hackathon.imageanalyzer.models.ImageEntity;
 import com.chegg.hackathon.imageanalyzer.models.VisionResponseEntity;
 import com.chegg.hackathon.imageanalyzer.service.DataService;
 import com.chegg.hackathon.imageanalyzer.service.GoogleVisionService;
+import com.chegg.hackathon.imageanalyzer.utils.Constants;
 
 import io.searchbox.core.DocumentResult;
 
@@ -20,6 +22,7 @@ import io.searchbox.core.DocumentResult;
 public class MediaImageAddedHandler implements RequestHandler<ImageEntity, GenericResponse<String>>{
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(MediaImageAddedHandler.class);
+	
 	
 	private GoogleVisionService visionClient;
 	
@@ -30,8 +33,17 @@ public class MediaImageAddedHandler implements RequestHandler<ImageEntity, Gener
 		
 		this.visionClient = new GoogleVisionService("src/main/resources/creds.json");
 		
-		this.dataServiceClient = new DataService("http://4ec6b2cc.ngrok.io/");
+		this.dataServiceClient = new DataService("https://PrNubABFKL:WZa52b4m9DevzkfGw6QCcgF@imc-testing-1189954276.ap-southeast-2.bonsaisearch.net/");
 		
+	}
+	
+	
+	public List<ImageEntity>getImagesforParticularIndex(String query, String index) {
+		
+		List<ImageEntity> output = null;
+
+		
+		return output;
 	}
 	
 	
@@ -41,6 +53,8 @@ public class MediaImageAddedHandler implements RequestHandler<ImageEntity, Gener
 		
 		GenericResponse<String> handlerResponse = new GenericResponse<>();
 		
+		boolean isTranscriptionDataNecessary = true;
+		
 		LOGGER.info("Received an Image with details : "+ imageEntity.toString());
 		
 		LOGGER.info("Sending Image to Cloud Vision API : "+ imageEntity.getImageUrl());
@@ -48,7 +62,10 @@ public class MediaImageAddedHandler implements RequestHandler<ImageEntity, Gener
 		GenericResponse<VisionResponseEntity> visionResponse = new GenericResponse<>();
 		
 		try {
-			visionResponse = this.visionClient.transcribeImage(imageEntity.getImageUrl());
+			
+			if(isTranscriptionDataNecessary) {
+				visionResponse = this.visionClient.transcribeImage(imageEntity.getImageUrl());
+			}
 			
 			if(visionResponse.getErrorCode() != null) {
 				
@@ -67,9 +84,9 @@ public class MediaImageAddedHandler implements RequestHandler<ImageEntity, Gener
 						+ "transcription results to Elastic Storage");
 				
 				GenericResponse<DocumentResult> storageResult = dataServiceClient.storeData(imageEntity,
-						imageEntity.getIndexName(), "transcriptionData");
+						imageEntity.getIndexName(), Constants.DEFAULT_ES_TYPE);
 				
-				
+
 				if(storageResult.getErrorCode() != null) {
 					handlerResponse.setErrorDetails(storageResult.getErrorMessage(), storageResult.getErrorCode());
 				} else {
@@ -78,7 +95,25 @@ public class MediaImageAddedHandler implements RequestHandler<ImageEntity, Gener
 				
 				
 			} else {
-				handlerResponse.setErrorDetails(visionResponse.getErrorMessage(), visionResponse.getErrorCode());
+				
+				if(!isTranscriptionDataNecessary) {
+					
+					GenericResponse<DocumentResult> storageResult = dataServiceClient.storeData(imageEntity,
+							imageEntity.getIndexName(), Constants.DEFAULT_ES_TYPE);
+					
+					if(storageResult.getErrorCode() != null) {
+						
+						handlerResponse.setErrorDetails(storageResult.getErrorMessage(), storageResult.getErrorCode());
+						
+					} else {
+						
+						handlerResponse.setResponse("Image Upload Successfull");		
+					}
+					
+				}else {
+					handlerResponse.setErrorDetails(visionResponse.getErrorMessage(), visionResponse.getErrorCode());
+				}
+				
 			}
 			
 			

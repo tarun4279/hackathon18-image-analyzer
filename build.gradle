@@ -32,11 +32,14 @@ dependencies {
 	compile 'io.searchbox:jest:2.4.0',
           	'io.searchbox:jest-common:2.4.0',
           	'com.amazonaws:aws-lambda-java-core:1.0.0',
-          	'com.google.cloud:google-cloud-vision:1.48.0'
+          	'com.google.cloud:google-cloud-vision:1.48.0',
+          	'org.mongodb:mongo-java-driver:3.4.3'
+    
           	
 	runtime 'com.google.cloud:google-cloud-vision:1.48.0'
           	
 	compile group: 'com.google.auth', name: 'google-auth-library-oauth2-http', version: '0.11.0'
+	compile group: 'org.json', name: 'json', version: '20090211'
 	
           	
 	testImplementation('org.springframework.boot:spring-boot-starter-test')

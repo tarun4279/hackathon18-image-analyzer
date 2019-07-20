@@ -9,12 +9,10 @@ import org.springframework.context.annotation.Configuration;
 
 import com.chegg.hackathon.imageanalyzer.service.DataService;
 import com.chegg.hackathon.imageanalyzer.service.GoogleVisionService;
+import com.chegg.hackathon.imageanalyzer.service.MongoService;
 
 @Configuration
 public class ApplicationConfiguration {
-
-	
-	
 
 	@Bean
 	public GoogleVisionService googleVisionService(@Value("${google.credentials.file.path}")
@@ -26,5 +24,10 @@ public class ApplicationConfiguration {
 	@Bean
 	public DataService dataService(@Value("${elasticsearch.base.url}") String esBaseUrl) {
 		return new DataService(esBaseUrl);
+	}
+	
+	@Bean
+	public MongoService getMongoService() {
+		return new MongoService();
 	}
 }

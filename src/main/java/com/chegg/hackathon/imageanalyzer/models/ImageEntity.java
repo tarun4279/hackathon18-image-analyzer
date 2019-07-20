@@ -2,6 +2,8 @@ package com.chegg.hackathon.imageanalyzer.models;
 
 import java.util.List;
 
+import org.springframework.web.multipart.MultipartFile;
+
 import io.searchbox.annotations.JestId;
 
 public class ImageEntity extends Entity{
@@ -15,7 +17,7 @@ public class ImageEntity extends Entity{
 	 * Image Info
 	 */
 	private String imageUrl;
-	private String imageData;
+	private MultipartFile imageData;
 	
 	
 	/**
@@ -55,11 +57,11 @@ public class ImageEntity extends Entity{
 		this.imageUrl = imageUrl;
 	}
 
-	public String getImageData() {
+	public MultipartFile getImageData() {
 		return imageData;
 	}
 
-	public void setImageData(String imageData) {
+	public void setImageData(MultipartFile imageData) {
 		this.imageData = imageData;
 	}
 
@@ -129,16 +131,12 @@ public class ImageEntity extends Entity{
 
 	@Override
 	public String toString() {
-		return new StringBuilder(imageUrl)
+		return new StringBuilder(String.valueOf(imageUrl))
 				.append(cheggSubjectId)
 				.append(cheggSource)
 				.append(cheggTags)
 				.toString();
 	}
 
-	@Override
-	public String getIndexName() {
-		return "images";
-	}
 
 }

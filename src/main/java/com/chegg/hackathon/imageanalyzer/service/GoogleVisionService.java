@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.chegg.hackathon.imageanalyzer.models.GenericResponse;
 import com.chegg.hackathon.imageanalyzer.models.VisionResponseEntity;
@@ -61,6 +62,20 @@ public class GoogleVisionService {
 	}
 	
 	
+	public GenericResponse<VisionResponseEntity> transcribeImage(MultipartFile file) throws IOException{
+		
+		ByteString imgBytes = ByteString.copyFrom(file.getBytes());
+		
+		if(imgBytes == null) {
+			return new GenericResponse<VisionResponseEntity>().setErrorDetails("Unable to fetch image", -1);
+		}
+		
+		AnnotateImageRequest request = createOCRImageRequest(imgBytes);
+		
+		return transcribeImage(request);
+	}
+	
+	
 	
 	private AnnotateImageRequest createOCRImageRequest(ByteString imgBytes) {
 		
@@ -94,10 +109,10 @@ public class GoogleVisionService {
 		
 		if(response.getTextAnnotationsList() != null) {
 			EntityAnnotation data = response.getTextAnnotationsList().get(0);
-			
+			float score = response.getFullTextAnnotation().getPages(0).getProperty().getDetectedLanguages(0).getConfidence();
 			
 			VisionResponseEntity visionResponseEntity = 
-					new VisionResponseEntity(data.getDescription(), data.getConfidence());
+					new VisionResponseEntity(data.getDescription(), score);
 			
 			
 			genericResponse.setResponse(visionResponseEntity);
